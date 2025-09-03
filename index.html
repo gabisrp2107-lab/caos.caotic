@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Caos xD</title>
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+      background: black;
+      color: white;
+      font-family: monospace;
+    }
+    canvas {
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="lienzo"></canvas>
+  <script>
+    const canvas = document.getElementById("lienzo");
+    const ctx = canvas.getContext("2d");
+
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    const texto = "TE AMO INGRID".split("");
+    const fontSize = 16;
+    const columnas = canvas.width / fontSize;
+    const gotas = [];
+    const fraseEspecial = "TE AMO INGRID".split("");
+    const columnaEspecial = []; // columnas donde aparecerá la frase
+
+    for (let i = 0; i < columnas; i++) {
+      gotas[i] = 1;
+      columnaEspecial[i] = -1; // -1 significa que no hay frase especial en esa columna
+    }
+
+    function dibujar() {
+      ctx.fillStyle = "rgba(0, 0, 0, 0.05)";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.font = fontSize + "px monospace";
+
+      for (let i = 0; i < gotas.length; i++) {
+        let letra = texto[Math.floor(Math.random() * texto.length)];
+        let color = "#ff66cc"; // rosa normal
+
+        // decidir si esta columna tendrá la frase especial
+        if (columnaEspecial[i] === -1 && Math.random() < 0.003) {
+          columnaEspecial[i] = 0; // empezar la frase desde la posición 0
+        }
+
+        // si la columna tiene frase especial
+        if (columnaEspecial[i] >= 0) {
+          letra = fraseEspecial[columnaEspecial[i]];
+          color = "orange";
+          columnaEspecial[i]++;
+
+          if (columnaEspecial[i] >= fraseEspecial.length) {
+            columnaEspecial[i] = -1; // terminar la frase
+          }
+        }
+
+        ctx.fillStyle = color;
+        ctx.fillText(letra, i * fontSize, gotas[i] * fontSize);
+
+        if (gotas[i] * fontSize > canvas.height && Math.random() > 0.975) {
+          gotas[i] = 0;
+        }
+        gotas[i]++;
+      }
+    }
+
+    setInterval(dibujar, 50);
+
+    window.addEventListener("resize", () => {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    });
+  </script>
+</body>
+</html>
