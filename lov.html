@@ -8,6 +8,7 @@
       margin: 0;
       overflow: hidden;
       background: black;
+      color: white;
       font-family: monospace;
     }
     canvas {
@@ -17,7 +18,6 @@
 </head>
 <body>
   <canvas id="lienzo"></canvas>
-
   <script>
     const canvas = document.getElementById("lienzo");
     const ctx = canvas.getContext("2d");
@@ -25,57 +25,50 @@
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
 
-    const letras = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789".split("");
-    const fraseEspecial = "TE AMO INGRID".split("");
-    const fontSize = 18;
-    const columnas = Math.floor(canvas.width / fontSize);
+    const texto = "TE AMO INGRID".split("");
+    const fontSize = 16;
+    const columnas = canvas.width / fontSize;
     const gotas = [];
-    const fraseColumnas = {}; // control de columnas que muestran la frase
-    const cooldownColumnas = []; // tiempo de espera para volver a usar la columna
+    const fraseEspecial = "TE AMO INGRID".split("");
+    const columnaEspecial = []; // columnas donde aparecerá la frase
 
     for (let i = 0; i < columnas; i++) {
-      gotas[i] = 0;
-      cooldownColumnas[i] = 0;
+      gotas[i] = 1;
+      columnaEspecial[i] = -1; // -1 significa que no hay frase especial en esa columna
     }
 
     function dibujar() {
-      ctx.fillStyle = "rgba(0,0,0,0.05)";
+      ctx.fillStyle = "rgba(0, 0, 0, 0.05)";
       ctx.fillRect(0, 0, canvas.width, canvas.height);
       ctx.font = fontSize + "px monospace";
 
-      for (let i = 0; i < columnas; i++) {
-        let char = letras[Math.floor(Math.random() * letras.length)];
-        let color = "#ff66cc"; // rosa por defecto
+      for (let i = 0; i < gotas.length; i++) {
+        let letra = texto[Math.floor(Math.random() * texto.length)];
+        let color = "#ff66cc"; // rosa normal
 
-        // Si esta columna está mostrando la frase
-        if (fraseColumnas[i] !== undefined) {
-          const pos = fraseColumnas[i];
-          char = fraseEspecial[pos];
+        // decidir si esta columna tendrá la frase especial
+        if (columnaEspecial[i] === -1 && Math.random() < 0.003) {
+          columnaEspecial[i] = 0; // empezar la frase desde la posición 0
+        }
+
+        // si la columna tiene frase especial
+        if (columnaEspecial[i] >= 0) {
+          letra = fraseEspecial[columnaEspecial[i]];
           color = "orange";
+          columnaEspecial[i]++;
 
-          fraseColumnas[i]++;
-
-          // cuando termina la frase, se libera la columna y aplica cooldown
-          if (fraseColumnas[i] >= fraseEspecial.length) {
-            delete fraseColumnas[i];
-            cooldownColumnas[i] = 200; // tiempo de espera antes de poder reaparecer
-          }
-        } else {
-          // solo intentar iniciar la frase si el cooldown terminó
-          if (cooldownColumnas[i] <= 0 && Math.random() > 0.9995) {
-            fraseColumnas[i] = 0; // empieza la frase
+          if (columnaEspecial[i] >= fraseEspecial.length) {
+            columnaEspecial[i] = -1; // terminar la frase
           }
         }
 
         ctx.fillStyle = color;
-        ctx.fillText(char, i * fontSize, gotas[i] * fontSize);
+        ctx.fillText(letra, i * fontSize, gotas[i] * fontSize);
 
-        gotas[i]++;
         if (gotas[i] * fontSize > canvas.height && Math.random() > 0.975) {
           gotas[i] = 0;
         }
-
-        if (cooldownColumnas[i] > 0) cooldownColumnas[i]--;
+        gotas[i]++;
       }
     }
 
